@@ -10,6 +10,8 @@ import { setDoc, doc, serverTimestamp } from "firebase/firestore"
 
 import { ReactComponent as ArrowRightIcon } from "../assets/svg/keyboardArrowRightIcon.svg"
 import visibilityIcon from "../assets/svg/visibilityIcon.svg"
+import { toast } from 'react-toastify'
+import OAuth from '../components/OAuth'
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -58,7 +60,7 @@ const Signup = () => {
 
       navigate("/")
     } catch (error) {
-      console.log(error)
+      toast.error('Seomthing went wrong with registration')
     }
   }
 
@@ -117,7 +119,7 @@ const Signup = () => {
           </div>
         </form>
 
-        {/* google oAuth components */}
+        <OAuth />
 
         <Link to="/sign-in" className="registerLink">
           Sign In Instead
