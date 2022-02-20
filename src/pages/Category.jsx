@@ -15,7 +15,7 @@ import { toast } from "react-toastify"
 import Spinner from "../components/Spinner"
 import ListingItem from "../components/ListingItem"
 
-const Offer = () => {
+const Category = () => {
   const [listings, setListings] = useState(null)
   const [loading, setLoading] = useState(true)
   const params = useParams()
@@ -26,7 +26,7 @@ const Offer = () => {
         const listingsRef = collection(db, "listings")
         const q = query(
           listingsRef,
-          where("offer", "==", true ),
+          where("type", "==", params.categoryName),
           orderBy("timestamp", "desc"),
           limit(10)
         )
@@ -36,7 +36,6 @@ const Offer = () => {
 
         querySnapshot.forEach((doc) => {
           console.log(doc.data())
-          console.log(doc.id)
           listings.push({
             id: doc.id,
             data: doc.data(),
@@ -51,13 +50,15 @@ const Offer = () => {
     }
 
     fetchListings()
-  }, [])
+  }, [params.categoryName])
 
   return (
     <div className="category">
       <header>
         <p className="pageHeader">
-          Offers
+          {params.categoryName === "rent"
+            ? "Places for rent"
+            : "Places for sale"}
         </p>
       </header>
 
@@ -68,18 +69,18 @@ const Offer = () => {
           <main>
             <ul className="categoryListings">
               {listings.map((listing) => (
-                <ListingItem listing={listing.data} id={listing.id} key={listing.id} />
+                <ListingItem listing={listing.data} id={listing.id}  key={listing.id} />
               ))}
             </ul>
           </main>
         </>
       ) : (
         <>
-          <p>There are no offers at the moment</p>
+          <p>No Listing for {params.categoryName}</p>
         </>
       )}
     </div>
   )
 }
 
-export default Offer
+export default Category
