@@ -9,11 +9,10 @@ import {
 import { useNavigate } from "react-router-dom"
 import { v4 as uuidv4 } from "uuid"
 
-
-import { FaToggleOn , FaToggleOff } from 'react-icons/fa'
+import { FaToggleOn, FaToggleOff } from "react-icons/fa"
 import Spinner from "../components/Spinner"
 import { toast } from "react-toastify"
-import { addDoc,  collection, serverTimestamp } from "firebase/firestore"
+import { addDoc, collection, serverTimestamp } from "firebase/firestore"
 import { db } from "../firebase.config"
 
 const CreateListing = () => {
@@ -143,36 +142,48 @@ const CreateListing = () => {
       })
     }
 
-    const imageUrls = await Promise.all([
+    const imageUrls = await Promise.all(
       [...images].map((image) => storeImage(image)),
-    ]).catch(() => {
+    ).catch(() => {
       setLoading(false)
       toast.error("Error while uploading files")
+      return 
     })
-
+    
+    
 
     const formDataCopy = {
       ...formData,
-      // imageUrls,
+      // imageUrls : [
+      //   'https://google.com' , 
+      //   'https://pantip.com'        
+      // ], 
+      imageUrls : imageUrls , 
       geolocation,
       timestamp: serverTimestamp(),
     }
-    
-    delete formDataCopy.images 
-    delete formDataCopy.address 
+
+    delete formDataCopy.images
+    delete formDataCopy.address
     delete formDataCopy.latitude
-    delete formDataCopy.longitude 
-    
+    delete formDataCopy.longitude
+
     location && (formDataCopy.location = location)
-    !formDataCopy.offer && delete formDataCopy.discountedPrice 
-    
-    console.log('FINAL!')
+    !formDataCopy.offer && delete formDataCopy.discountedPrice
+
+    console.log("FINAL!")
     console.log(formDataCopy)
-    
-    const docRef = await addDoc(collection(db , 'listings') , formDataCopy )
-    setLoading(false)
-    toast.success('Listing saved')
-    navigate(`/category/${formDataCopy.type}/${docRef.id}`)
+
+    try {
+      const docRef = await addDoc(collection(db, "listings"), formDataCopy)
+      setLoading(false)
+      toast.success("Listing saved")
+      navigate(`/category/${formDataCopy.type}/${docRef.id}`)
+    } catch (error) {
+      console.log(error)
+      setLoading(false)
+      toast.error("Error while creating doc")
+    }
   }
 
   const onMutate = (e) => {
@@ -225,15 +236,22 @@ const CreateListing = () => {
     <div className="profile">
       <header>
         <p className="pageHeader">Create a Listing</p>
-        
+
         <p className="pageHeaderEnd">
-        Use geolocation 
-        { geolocationEnabled ? (
-        <FaToggleOn fill="#00CC66" size={20} onClick={() => setGeolocationEnabled( prevState => !prevState )}/>  
-        ) : (
-          <FaToggleOff fill="#666666" size={20} onClick={() => setGeolocationEnabled( prevState => !prevState )}/>
-        )
-      }
+          Use geolocation
+          {geolocationEnabled ? (
+            <FaToggleOn
+              fill="#00CC66"
+              size={20}
+              onClick={() => setGeolocationEnabled((prevState) => !prevState)}
+            />
+          ) : (
+            <FaToggleOff
+              fill="#666666"
+              size={20}
+              onClick={() => setGeolocationEnabled((prevState) => !prevState)}
+            />
+          )}
         </p>
       </header>
       <main>
@@ -450,7 +468,7 @@ const CreateListing = () => {
             The first image will be the cover (max 6).
           </p>
           <input
-            className="formInputFile"
+            className="formInputFiles"
             type="file"
             id="images"
             onChange={onMutate}

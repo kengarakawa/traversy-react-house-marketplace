@@ -6,6 +6,8 @@ import Offers from './pages/Offers'
 import Profile from './pages/Profile'
 import Signin from './pages/Signin'
 import Signup from './pages/Signup'
+import Listing from './pages/Listing'
+
 import ForgotPassword from './pages/ForgotPassword'
 import CreateListing from './pages/CreateListing'
 
@@ -27,6 +29,7 @@ function App() {
         
         <Route path="/offers" element={<Offers />} />
         <Route path="/category/:categoryName" exact element={<Category />} />
+        <Route path="/category/:categoryName/:listingId" exact element={<Listing />} />
         
         <Route path="/profile" element={<PrivateRoute  />} >
           <Route path="/profile" element={<Profile />} />
