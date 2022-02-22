@@ -20,7 +20,7 @@ const ListingItem = ({ listing, id, onDelete }) => {
           <p className="categoryListinLocation">{listing.location}</p>
           <p className="categoryListingName">{listing.name}</p>
 
-          <p className="categoryListingType">
+          <p className="categoryListingPrice">
             $
             {listing.offer
               ? listing.discountedPrice
