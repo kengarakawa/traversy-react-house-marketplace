@@ -1,12 +1,13 @@
 import { getAuth, updateProfile } from "firebase/auth"
-import { useState } from "react"
+import { useState , useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { toast } from "react-toastify"
-import { updateDoc, doc } from "firebase/firestore"
+import { updateDoc, doc , getDocs , collection , query , where , orderBy , deleteDoc  } from "firebase/firestore"
 import { db } from "../firebase.config"
 import arrowRightIcon from '../assets/svg/keyboardArrowRightIcon.svg'
 import homeIcon from '../assets/svg/homeIcon.svg'
 
+import ListingItem from '../components/ListingItem'
 
 const Profile = () => {
   const auth = getAuth()
@@ -20,6 +21,35 @@ const Profile = () => {
   })
 
   const { name, email } = formData
+  const [listings , setListings] = useState(null)
+  const [loading , setLoading] = useState(true)
+  
+  useEffect(() => {
+    const fetchUserListing = async () => {
+      const listingsRef = collection(db , 'listings' )
+      const q = query(listingsRef , where('userRef' , '==', auth.currentUser.uid) , orderBy('timestamp' ,'desc'))
+      
+      const querySnapshot = await getDocs(q)
+      const listings = []
+      querySnapshot.forEach( doc => {
+        
+        return listings.push({
+          id: doc.id ,
+          data: doc.data()           
+        })
+      })
+      
+      setListings(listings)      
+      setLoading(false)
+    }
+    
+    
+    fetchUserListing()
+  
+    
+  }, [auth.currentUser.uid])
+  
+  
 
   const onLogout = () => {
     auth.signOut()
@@ -49,6 +79,19 @@ const Profile = () => {
     } catch (error) {
       toast.error("Error while precessing request")
     }
+  }
+  
+  
+  const onDelete = async (listingId ) => {
+    if(window.confirm('Are you sure to delete this listing?')) {
+      
+      await deleteDoc( doc(db , 'listings' , listingId) )
+      const updatedListings = listings.filter( listing => listing.id !== listingId )
+      setListings(updatedListings)
+      toast.success('Listing removed')
+      
+    }
+    
   }
 
   return (
@@ -102,9 +145,18 @@ const Profile = () => {
           <img src={homeIcon} alt="create listing" />
           <p>Sell or rent your home</p>
         </Link>
+        
+        { !loading && listings?.length > 0 && (        
+          <>
+          <p className="listingText">Your Listings</p>
+          <ul className="listingsList">
+          {listings.map( listing => (
+            <ListingItem key={listing.id} listing={listing.data} id={listing.id} onDelete={()=> onDelete(listing.id)}/>
+          ))}
+          </ul>
+          </>
+        )}
       </main>
-
-      <h1>Profile</h1>
     </div>
   )
 }
